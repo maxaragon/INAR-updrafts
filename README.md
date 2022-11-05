@@ -1,5 +1,20 @@
 # INAR-updrafts :cloud:
 
+## Python implementation for retrieving cloud base vertical velocities using Cloudnet data[^1].
+
+
+Create virtual environment:
+
+    python -m venv INAR
+
+Activate virtual environment (Windows):
+
+    INAR/Scripts/activate
+    
+Install required libraries:
+
+    pip install -r requirements.txt
+
 ## BAECC directory includes:
 
 
@@ -11,3 +26,6 @@
 
 * vertical_vel_drizzle: Quick lookup figures of vertical velocities including drizzle
 * vertical_vel_clouds: Quick lookup figures of vetical velocities of liquid clouds only
+
+
+[^1]: https://cloudnet.fmi.fi/
