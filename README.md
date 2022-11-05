@@ -1,6 +1,6 @@
 # INAR-updrafts :cloud:
 
-## Python implementation for retrieving cloud base vertical velocities using Cloudnet data[^1].
+## Python implementation for retrieving cloud base vertical velocities using Cloudnet data[^1]
 
 
 Create virtual environment:
@@ -14,6 +14,10 @@ Activate virtual environment (Windows):
 Install required libraries:
 
     pip install -r requirements.txt
+    
+Add the environment to Jupyter:
+
+    ipython kernel install --user --name=INAR
 
 ## BAECC directory includes:
 
