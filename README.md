@@ -11,6 +11,10 @@ Activate virtual environment (Windows):
 
     INAR/Scripts/activate
     
+Activate virtual environment (Mac):
+
+    source INAR/bin/activate
+    
 Install required libraries:
 
     pip install -r requirements.txt
