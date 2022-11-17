@@ -11,13 +11,13 @@ Activate virtual environment (Windows):
 
     INAR/Scripts/activate
     
-Activate virtual environment (Mac):
+Activate virtual environment (Mac and Linux):
 
     source INAR/bin/activate
     
 Install required libraries:
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     
 Add the environment to Jupyter:
 
