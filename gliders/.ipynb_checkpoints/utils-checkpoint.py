@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 import fnmatch
 import wget
+import re
 import os
 
 
@@ -32,13 +33,13 @@ def is_cloudnetpy_dir(site:str, categorize_dir:str='Categorize', classification_
             generate_classification(os.path.join(categorize_dir, filecat), os.path.join(classification_dir, filecat[:8] + '_' + site + '_classification' + '.nc'))
 
 def is_cloudnetpy_file(classification_file: str, categorize_file: str):
-  output_name = str(classification_file)
-  classification_xrfile = xr.open_dataset(classification_file)
-  classification_cloudnetpy_exist = any('cloudnetpy' in i for i in classification_xrfile.attrs)
-  if not classification_cloudnetpy_exist:
-    classification_xrfile.close()
-    os.remove(classification_file)
-    generate_classification(categorize_file, output_name)
+    output_name = str(classification_file)
+    classification_xrfile = xr.open_dataset(classification_file)
+    classification_cloudnetpy_exist = any('cloudnetpy' in i for i in classification_xrfile.attrs)
+    if not classification_cloudnetpy_exist:
+        classification_xrfile.close()
+        os.remove(classification_file)
+        generate_classification(categorize_file, output_name)
 
 
 
@@ -50,8 +51,6 @@ def open_files(classification_file: str, categorize_file: str):
     date = ''.join(split)
     output_name = str(classification_file)
     site = output_name.split('_')[-2]
-    #site = ds.attrs['location'].lower()
-    #site = unidecode.unidecode(site)
     return classification, categorize, date, site
 
 
@@ -209,17 +208,17 @@ def download_cloudnet(
     legacy = ['2011','2012','2013','2014', '2015', '2016', '2017']
 
     if any(year in start for year in legacy) and (end is None):
-      url = 'https://cloudnet.fmi.fi/api/files?site=' + site + '&showLegacy'
-      payload = {'date': start, 'product': products}
+        url = 'https://cloudnet.fmi.fi/api/files?site=' + site + '&showLegacy'
+        payload = {'date': start, 'product': products}
     elif any(year in start for year in legacy):
-      url = 'https://cloudnet.fmi.fi/api/files/?site=' + site + '&dateFrom=' + start + '&dateTo=' + end + '&showLegacy'
-      payload = {'product': products}
+        url = 'https://cloudnet.fmi.fi/api/files/?site=' + site + '&dateFrom=' + start + '&dateTo=' + end + '&showLegacy'
+        payload = {'product': products}
     elif end is None: 
-      url = 'https://cloudnet.fmi.fi/api/files?site=' + site
-      payload = {'date': start, 'product': products}
+        url = 'https://cloudnet.fmi.fi/api/files?site=' + site
+        payload = {'date': start, 'product': products}
     else:
-      url = 'https://cloudnet.fmi.fi/api/files/?site=' + site + '&dateFrom=' + start + '&dateTo=' + end
-      payload = {'product': products}
+        url = 'https://cloudnet.fmi.fi/api/files/?site=' + site + '&dateFrom=' + start + '&dateTo=' + end
+        payload = {'product': products}
     
     response = requests.get(url, payload)
     data = response.json()
@@ -227,7 +226,7 @@ def download_cloudnet(
     df = pd.DataFrame(data)
     if df.empty:
         pass
-      #raise Exception("No data available")
+       #raise Exception("No data available")
     else:
         file = df.downloadUrl
         output_dir_exist = os.path.exists('Products_' + site)
@@ -241,6 +240,10 @@ def download_cloudnet(
         categorize_exist_out = os.path.exists('Products_' + site + '/' + 'Categorize')
         if not categorize_exist_out:
             os.makedirs('Products_' + site + '/' + 'Categorize')
+            
+        updraft_exist_out = os.path.exists('Products_' + site + '/' + 'Updraft')
+        if not updraft_exist_out:
+            os.makedirs('Products_' + site + '/' + 'Updraft')
 
         for i in file:
             if fnmatch.fnmatch(i, '*classification.nc'):
@@ -290,3 +293,10 @@ def download_cloudnet_all(start:str, end:str):
     sites = list(df.id)
     for site in sites:
         download_cloudnet(site=site, start=start, end=end)
+        
+        
+def purge(dir, pattern):
+    for f in os.listdir(dir):
+        for i in pattern:
+            if re.search(i, f):
+                os.remove(os.path.join(dir, f))
