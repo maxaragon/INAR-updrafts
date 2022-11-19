@@ -119,11 +119,12 @@ def nonupdraft(classification_path, categorize_path, updraft_path):
         if element not in updraft_dates:
             nonupdrafts.append(element)
     
-    return nonupdrafts
+    return nonupdrafts, site
 
 
 def keep_updrafts(classification_path, categorize_path, updraft_path):
-    nonupdrafts = nonupdraft(classification_path, categorize_path, updraft_path)
+    nonupdrafts, site = nonupdraft(classification_path, categorize_path, 
+updraft_path)
     purge(classification_path, nonupdrafts)
     purge(categorize_path, nonupdrafts)
     for classification, categorize in zip(sorted(filter(lambda x: os.path.isfile(os.path.join(classification_path,x)),os.listdir(classification_path))), sorted(filter(lambda x: os.path.isfile(os.path.join(categorize_path, x)),os.listdir(categorize_path)))):
