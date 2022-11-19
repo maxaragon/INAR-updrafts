@@ -130,3 +130,37 @@ def keep_updrafts(classification_path, categorize_path, updraft_path):
         assert len(os.listdir(classification_path)) == len(os.listdir(categorize_path))
         generate_updraft_nc(os.path.join(classification_path, classification), os.path.join(categorize_path, categorize))
         generate_updraft_nc(os.path.join(classification_path, classification), os.path.join(categorize_path, categorize), 'ice')
+        
+    out3 = []
+
+    for file in os.listdir(updraft_path + '/' + 'output_3_' + site):
+        out3.append(file.split('_')[0])
+
+    out2 = []
+
+    for file in os.listdir(updraft_path + '/' + 'output_2_' + site):
+        out2.append(file.split('_')[0])
+
+    out1 = []
+
+    for file in os.listdir(updraft_path + '/' + 'output_1_' + site):
+        out1.append(file.split('_')[0])
+
+
+
+    nonout = []
+    for element in out3:
+        if element not in out1:
+            nonout.append(element)
+
+    for element in out2:
+        if element not in out1:
+            nonout.append(element)
+
+    final = [*set(nonout)]
+    
+    purge(updraft_path + '/' + 'output_1_' + site, final)
+    purge(updraft_path + '/' + 'output_2_' + site, final)
+    purge(updraft_path + '/' + 'output_3_' + site, final)
+    purge(classification_path, final)
+    purge(categorize_path, final)
