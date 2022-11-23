@@ -26,15 +26,12 @@ def generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None):
         if np.count_nonzero(~np.isnan(CBU)) < 10:
             pass
         else:
-            #maxlim = np.nanmax(CBU.values)
-            #filename = os.path.basename(classification_raw)[:9] + 'hyytiala_updraft_clouds.nc'
             if class2filter == 'ice':
                 output_dir_exist = os.path.exists('Products_' + site + '/' + 'Updraft' + '/' + 'output_2_' + site)
                 if not output_dir_exist:
                     os.makedirs('Products_' + site + '/' + 'Updraft' + '/' + 'output_2_' + site)
                 filename = date + '_' + site + '_updraft_2.nc'
                 out = 'Products_' + site + '/' + 'Updraft' + '/' + 'output_2_' + site + '/' + filename
-                #path_file = os.path.join(out + os.path.basename(filename))
                 updraft_exist_nc = os.path.exists(out)
                 if not updraft_exist_nc:
                     CBU.close()
@@ -48,7 +45,6 @@ def generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None):
                     os.makedirs('Products_' + site + '/' + 'Updraft' + '/' + 'output_3_' + site)
                 filename = date + '_' + site + '_updraft_3.nc'
                 out = 'Products_' + site + '/' + 'Updraft' + '/' + 'output_3_' + site + '/' + filename
-                #path_file = os.path.join(out + os.path.basename(filename))
                 updraft_exist_nc = os.path.exists(out)
                 if not updraft_exist_nc:
                     CBU.close()
@@ -62,7 +58,6 @@ def generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None):
                     os.makedirs('Products_' + site + '/' + 'Updraft' + '/' + 'output_1_' + site)
                 filename = date + '_' + site + '_updraft_1.nc'
                 out = 'Products_' + site + '/' + 'Updraft' + '/' + 'output_1_' + site + '/' + filename
-                #path_file = os.path.join(out + os.path.basename(filename))
                 updraft_exist_nc = os.path.exists(out)
                 if not updraft_exist_nc:
                     CBU.close()
@@ -117,14 +112,13 @@ def nonupdraft(classification_path, categorize_path, updraft_path):
     nonupdrafts = []
     for element in class_dates:
         if element not in updraft_dates:
-            nonupdrafts.append(element)
+            nonupdrafts.append(element) 
     
     return nonupdrafts, site
 
 
 def keep_updrafts(classification_path, categorize_path, updraft_path):
-    nonupdrafts, site = nonupdraft(classification_path, categorize_path, 
-updraft_path)
+    nonupdrafts, site = nonupdraft(classification_path, categorize_path, updraft_path)
     purge(classification_path, nonupdrafts)
     purge(categorize_path, nonupdrafts)
     for classification, categorize in zip(sorted(filter(lambda x: os.path.isfile(os.path.join(classification_path,x)),os.listdir(classification_path))), sorted(filter(lambda x: os.path.isfile(os.path.join(categorize_path, x)),os.listdir(categorize_path)))):
@@ -165,3 +159,4 @@ updraft_path)
     purge(updraft_path + '/' + 'output_3_' + site, final)
     purge(classification_path, final)
     purge(categorize_path, final)
+    
