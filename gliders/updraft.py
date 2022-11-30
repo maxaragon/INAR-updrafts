@@ -69,21 +69,26 @@ def generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None):
     
 
 def generate_updraft_nc(classification_file: str, categorize_file: str, class2filter=None):
-    classification, categorize, date, site = open_files(classification_file, categorize_file)
-    cbh, cth = get_height(classification)
-    doppler_vel = get_doppler(categorize)
-    classes, clouds, aerosols, insects, drizzle, ice, fog = get_classes(classification)
-    if class2filter == 'ice':
-        clouds_ice_filtered,cloudsC3 = filter_ice(clouds,ice)
-        cbh_clouds = get_filtered_cbh(cbh, clouds_ice_filtered)
-        out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter)
-    elif class2filter == 'ice-drizzle':
-        clouds_filtered,cloudsC3 = filter_drizzle_ice(clouds,drizzle,ice)
-        cbh_clouds = get_filtered_cbh(cbh, clouds_filtered)
-        out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter)
-    elif class2filter is None:
-        cbh_clouds = get_filtered_cbh(cbh,clouds)
-        out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None)
+    try:
+        classification, categorize, date, site = open_files(classification_file, categorize_file)
+    except:
+        pass
+    else:
+        cbh, cth = get_height(classification)
+        doppler_vel = get_doppler(categorize)
+        classes, clouds, aerosols, insects, drizzle, ice, fog = get_classes(classification)
+        if class2filter == 'ice':
+            clouds_ice_filtered,cloudsC3 = filter_ice(clouds,ice)
+            cbh_clouds = get_filtered_cbh(cbh, clouds_ice_filtered)
+            out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter)
+        elif class2filter == 'ice-drizzle':
+            clouds_filtered,cloudsC3 = filter_drizzle_ice(clouds,drizzle,ice)
+            cbh_clouds = get_filtered_cbh(cbh, clouds_filtered)
+            out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter)
+        elif class2filter is None:
+            cbh_clouds = get_filtered_cbh(cbh,clouds)
+            out = generate_cbu(cbh_clouds, doppler_vel, date, site, class2filter=None)
+    #print(f'Done {classification_file}')
         
         
 def nonupdraft(classification_path, categorize_path, updraft_path):
