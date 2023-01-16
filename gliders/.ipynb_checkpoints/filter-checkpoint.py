@@ -1,3 +1,12 @@
+
+import os
+import glob
+import xarray as xr
+import pandas as pd
+
+
+
+
 def filter_drizzle_ice(clouds,drizzle,ice):
     
 
@@ -81,3 +90,49 @@ def filter_ice(clouds,ice):
 def get_filtered_cbh(cbh,clouds_filtered):
     cbh_clouds = cbh.where(cbh.notnull() == clouds_filtered.notnull())
     return cbh_clouds
+
+def generate_library(path):
+    '''
+    
+    Rank files based on draft abundance 'drafts' or mean velocities 'mean'
+    
+    '''
+    # check if the path exists
+    if not os.path.exists(path):
+        raise ValueError(f'{path} does not exist')
+    # Initialize an empty list to store the data
+    data = []
+
+    # Iterate over the list of file paths
+    for i in glob.glob(path + '/*.nc'):
+        # Open the file and get the length of u3.v
+        ds = xr.open_dataset(i)
+        v_len = len(ds.v)
+        m1 = float(ds.v.mean().values); v_mean = round(m1,4)
+
+        # Store the file path and the length of u3.v in a tuple
+        data.append((i, v_len, v_mean))
+
+    # Create a pandas data frame from the data
+    df = pd.DataFrame(data, columns=['date', 'drafts', 'mean'])
+    
+    min_val = df["drafts"].min()
+    max_val = df["drafts"].max()
+
+    min_val_m = df["mean"].min()
+    max_val_m = df["mean"].max()
+    
+    df["drafts"] = (df["drafts"] - min_val) / (max_val - min_val)
+    df["mean"] = (df["mean"] - min_val_m) / (max_val_m - min_val_m)
+    
+    df["score"] = df["drafts"] + df["mean"]
+    
+    df = df.sort_values(['score'], ascending=[False])
+    
+    
+    def extract_date(file_name):
+        return file_name.split('/')[3].split('_')[0]
+
+    df['date'] = df['date'].apply(extract_date)
+    
+    return df

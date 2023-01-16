@@ -8,6 +8,20 @@ import xarray as xr
 import numpy as np
 import seaborn as sns
 
+def startx(classes):
+        date = str(classes.time.data[0])[0:10]
+        time =str(classes.time.data[0])[11:16]
+        y = date + ' ' + time
+        startx = datetime.strptime(y, "%Y-%m-%d %H:%M")
+        return startx
+    
+def endx(classes):
+        date = str(classes.time.data[-1])[0:10]
+        time =str(classes.time.data[-1])[11:16]
+        y = date + ' ' + time
+        endx = datetime.strptime(y, "%Y-%m-%d %H:%M")
+        return endx
+
 def plot_raw(classification_file,categorize_file):
     classification, categorize, date, site = open_files(classification_file, categorize_file)
     
@@ -40,21 +54,7 @@ def plot_raw(classification_file,categorize_file):
     pcm = clouds_drizzle_ice.plot(x='time', ax=ax1, cmap=cmap, norm=norm, add_colorbar=False)
     cbar = fig.colorbar(pcm, orientation="vertical", ax=ax1, ticks=x)
     cbar.set_ticklabels(['Clouds', 'Droplets', 'Drizzle', 'Ice'])
-    
-    
-    def startx(classes):
-        date = str(classes.time.data[0])[0:10]
-        time =str(classes.time.data[0])[11:16]
-        y = date + ' ' + time
-        startx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return startx
-    
-    def endx(classes):
-        date = str(classes.time.data[-1])[0:10]
-        time =str(classes.time.data[-1])[11:16]
-        y = date + ' ' + time
-        endx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return endx
+
     
     for ax in [ax1]:
         ax.set_ylim([0, np.nanmax(cbh_clouds(cbh,clouds)) + 1500])
@@ -120,20 +120,6 @@ def plot_filters(classification_file,categorize_file):
     ax3.set_title('Ice and drizzle filtered')
 
     
-    def startx(classes):
-        date = str(classes.time.data[0])[0:10]
-        time =str(classes.time.data[0])[11:16]
-        y = date + ' ' + time
-        startx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return startx
-    
-    def endx(classes):
-        date = str(classes.time.data[-1])[0:10]
-        time =str(classes.time.data[-1])[11:16]
-        y = date + ' ' + time
-        endx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return endx
-    
     for ax in [ax1]:
         ax.set_ylim([0, np.nanmax(cbh_clouds(cbh,clouds)) + 1500])
         ax.set_ylabel('Height above mean sea level (m)')
@@ -196,21 +182,6 @@ def plot_filters_v(classification_file,categorize_file):
     cloudsC3.plot(x='time', ax=ax3, add_colorbar=False, cmap=cmap)
     ax3.set_ylabel('')
     
-    
-    
-    def startx(classes):
-        date = str(classes.time.data[0])[0:10]
-        time =str(classes.time.data[0])[11:16]
-        y = date + ' ' + time
-        startx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return startx
-    
-    def endx(classes):
-        date = str(classes.time.data[-1])[0:10]
-        time =str(classes.time.data[-1])[11:16]
-        y = date + ' ' + time
-        endx = datetime.strptime(y, "%Y-%m-%d %H:%M")
-        return endx
     
     for ax in [ax1]:
         ax.set_ylim([0, np.nanmax(cbh_clouds(cbh,clouds)) + 1500])
@@ -329,4 +300,54 @@ def plot_updrafts(classification_file, updraft_file):
     plt.title('Cloud Base Updrafts/Downdrafts', fontsize=14)
 
     plt.tight_layout()
+    plt.show()
+    
+def plot_cbt(classification_file, categorize_file):
+    """
+    Plots the temperature of clouds as a function of time and height.
+    The temperature is interpolated to the time and height of the clouds.
+    The function expects the paths to two NetCDF files:
+    - cla_path: path to the file containing the cloud classification
+    - cat_path: path to the file containing the temperature
+    
+    Returns:
+    - a figure containing the plot
+    """
+    
+    def cbh_clouds(cbh,clouds):
+        cbh_clouds = cbh.where(cbh.notnull() == clouds.notnull())
+        return cbh_clouds
+
+    
+    cla, cat, date, site = open_files(classification_file, categorize_file)
+    
+    cbh, cth = get_height(cla)
+
+    temp = cat.temperature
+
+    classes = cla.target_classification 
+
+    clouds = classes.where(classes == 1)
+
+    cbh_clouds = cbh_clouds(cbh, clouds)
+
+    temp_interp = temp.interp(model_time=clouds.time, model_height=clouds.height, method='nearest')
+    cbt = temp_interp.where(temp_interp.notnull() == clouds.notnull())
+
+    fig, ax1 = plt.subplots(1, figsize=(12, 3))
+
+    myFmt = mdates.DateFormatter('%H')
+    ax1.xaxis.set_major_formatter(myFmt)
+    cbt.plot(x='time', ax=ax1, add_colorbar=True, cmap='coolwarm')
+    ax1.set_ylabel('Height above mean sea level (m)')
+    ax1.set_title(str(cla.time[0].values)[:10], loc='left')
+    ax1.set_title(site.capitalize(), loc='right')
+    ax1.set_title('Liquid clouds temperature')
+    ax1.set_ylim([0, np.nanmax(cbh_clouds) + 1500])
+    ax1.set_xlim([startx(classes), endx(classes)])
+    ax1.set_xlabel('Time (UTC)')
+
+    for label in ax1.get_xticklabels():
+        label.set_rotation(0)
+
     plt.show()
