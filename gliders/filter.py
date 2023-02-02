@@ -94,7 +94,7 @@ def get_filtered_cbh(cbh,clouds_filtered):
 def generate_library(path):
     '''
     
-    Rank files based on draft abundance 'drafts' or mean velocities 'mean'
+    Rank files based on draft abundance 'drafts' and mean velocities 'mean'
     
     '''
     # check if the path exists
@@ -114,18 +114,18 @@ def generate_library(path):
         data.append((i, v_len, v_mean))
 
     # Create a pandas data frame from the data
-    df = pd.DataFrame(data, columns=['date', 'drafts', 'mean'])
+    df = pd.DataFrame(data, columns=['date', 'drafts', 'mean_v'])
     
     min_val = df["drafts"].min()
     max_val = df["drafts"].max()
 
-    min_val_m = df["mean"].min()
-    max_val_m = df["mean"].max()
+    min_val_m = df["mean_v"].min()
+    max_val_m = df["mean_v"].max()
     
-    df["drafts"] = (df["drafts"] - min_val) / (max_val - min_val)
-    df["mean"] = (df["mean"] - min_val_m) / (max_val_m - min_val_m)
+    df["drafts_normal"] = (df["drafts"] - min_val) / (max_val - min_val)
+    df["mean_v_normal"] = (df["mean_v"] - min_val_m) / (max_val_m - min_val_m)
     
-    df["score"] = df["drafts"] + df["mean"]
+    df["score"] = df["drafts_normal"] + df["mean_v_normal"]
     
     df = df.sort_values(['score'], ascending=[False])
     
